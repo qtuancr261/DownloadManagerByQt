@@ -16,6 +16,8 @@ class DownloadManagerWidget : public QWidget
 
 public:
     explicit DownloadManagerWidget(QWidget *parent = nullptr);
+    void downloadByHTTP();
+    void downloadByFTP();
     ~DownloadManagerWidget();
 
 private:

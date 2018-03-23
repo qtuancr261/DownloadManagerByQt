@@ -11,6 +11,16 @@ DownloadManagerWidget::DownloadManagerWidget(QWidget *parent) :
     QObject::connect(networkManager, &QNetworkAccessManager::finished, this, &DownloadManagerWidget::downloadFinished);
 }
 
+void DownloadManagerWidget::downloadByHTTP()
+{
+
+}
+
+void DownloadManagerWidget::downloadByFTP()
+{
+
+}
+
 DownloadManagerWidget::~DownloadManagerWidget()
 {
     delete ui;
@@ -18,13 +28,21 @@ DownloadManagerWidget::~DownloadManagerWidget()
 
 void DownloadManagerWidget::startDownload()
 {
-    QString downloadContent{ui->lineEditURL->text()};
+    QUrl downloadContent{ui->lineEditURL->text()};
     if (downloadContent.isEmpty())
     {
         QMessageBox::information(this, "Invalid URL", "Please use a valid URL for downloading.", QMessageBox::Ok);
         ui->lineEditURL->setFocus();
     }
-    networkManager->get(QNetworkRequest(QUrl(ui->lineEditURL->text())));
+    else
+    {
+        if (downloadContent.scheme() == "http")
+            qDebug() << "HTTP Request";
+        else if (downloadContent.scheme() == "ftp")
+            qDebug() << "FTP Request";
+        networkManager->get(QNetworkRequest(QUrl(ui->lineEditURL->text())));
+        QMessageBox::information(this, "File", downloadContent.fileName(), QMessageBox::Ok);
+    }
 }
 
 void DownloadManagerWidget::downloadFinished(QNetworkReply *replyFromServer)
