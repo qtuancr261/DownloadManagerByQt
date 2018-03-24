@@ -49,7 +49,7 @@ void DownloadManagerWidget::downloadFinished(QNetworkReply *replyFromServer)
 {
     if (replyFromServer->error())
     {
-        ui->pTextEditPreview->setPlainText(replyFromServer->errorString());
+        QMessageBox::information(this, "Error when downloading", replyFromServer->errorString());
     }
     else
     {
