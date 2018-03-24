@@ -53,7 +53,12 @@ void DownloadManagerWidget::downloadFinished(QNetworkReply *replyFromServer)
     }
     else
     {
-        ui->pTextEditPreview->setPlainText(replyFromServer->readAll());
+        //ui->pTextEditPreview->setPlainText(replyFromServer->readAll());
+        QFile downloadedFile{"SmartBoy.pdf"};
+        downloadedFile.open(QIODevice::WriteOnly);
+        //QDataStream fileWriter{&downloadedFile};
+        //fileWriter << replyFromServer->readAll();
+        downloadedFile.write(replyFromServer->readAll());
         replyFromServer->deleteLater();
     }
 }

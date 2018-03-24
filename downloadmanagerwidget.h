@@ -6,6 +6,9 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QMessageBox>
+#include <QFile>
+#include <QDataStream>
+#include <QTextStream>
 namespace Ui {
 class DownloadManagerWidget;
 }
