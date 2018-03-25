@@ -11,16 +11,29 @@ DownloadManagerWidget::DownloadManagerWidget(QWidget *parent) :
     ui->groupBoxAuthenticationServer->setVisible(false);
     QObject::connect(ui->buttonDownload, &QPushButton::pressed, this, &DownloadManagerWidget::startDownload);
     QObject::connect(networkManager, &QNetworkAccessManager::finished, this, &DownloadManagerWidget::downloadFinished);
+    QObject::connect(networkManager, &QNetworkAccessManager::authenticationRequired, this, &DownloadManagerWidget::provideAuthentication);
 }
 
 void DownloadManagerWidget::downloadByHTTP()
 {
     qDebug() << "HTTP Request";
+    networkManager->get(QNetworkRequest(QUrl(ui->lineEditURL->text())));
 }
 
 void DownloadManagerWidget::downloadByFTP()
 {
     qDebug() << "FTP Request";
+    QUrl FTPReuqest{ui->lineEditURL->text()};
+    //FTPReuqest.setUserName(QString("thieuquangtuan"));
+    //FTPReuqest.setPassword(QString("thematrix141"));
+    FTPReuqest.setPath(FTPReuqest.fileName());
+    networkManager->get(QNetworkRequest(FTPReuqest));
+}
+
+void DownloadManagerWidget::provideAuthentication(QNetworkReply *replyFromServer, QAuthenticator *authenticator)
+{
+    authenticator->setUser("thieuquangtuan");
+    authenticator->setPassword("thematrix141");
 }
 
 DownloadManagerWidget::~DownloadManagerWidget()
@@ -46,7 +59,7 @@ void DownloadManagerWidget::startDownload()
         {
             downloadByFTP();
         }
-        networkManager->get(QNetworkRequest(QUrl(ui->lineEditURL->text())));
+
         QMessageBox::information(this, "File", downloadContent.fileName(), QMessageBox::Ok);
     }
 }
@@ -60,7 +73,7 @@ void DownloadManagerWidget::downloadFinished(QNetworkReply *replyFromServer)
     else
     {
         //ui->pTextEditPreview->setPlainText(replyFromServer->readAll());
-        QFile downloadedFile{"SmartBoy.pdf"};
+        QFile downloadedFile{QUrl(ui->lineEditURL->text()).fileName()};
         downloadedFile.open(QIODevice::WriteOnly);
         //QDataStream fileWriter{&downloadedFile};
         //fileWriter << replyFromServer->readAll();
