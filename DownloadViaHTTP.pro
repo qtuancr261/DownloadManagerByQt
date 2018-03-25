@@ -33,3 +33,6 @@ HEADERS += \
 
 FORMS += \
         downloadmanagerwidget.ui
+
+RESOURCES += \
+    resources.qrc
