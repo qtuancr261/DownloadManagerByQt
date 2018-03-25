@@ -26,14 +26,23 @@ void DownloadManagerWidget::downloadByFTP()
     QUrl FTPReuqest{ui->lineEditURL->text()};
     //FTPReuqest.setUserName(QString("thieuquangtuan"));
     //FTPReuqest.setPassword(QString("thematrix141"));
-    FTPReuqest.setPath(FTPReuqest.fileName());
+    qDebug() << FTPReuqest.path().mid(1);
+    FTPReuqest.setPath(FTPReuqest.path().mid(1));
     networkManager->get(QNetworkRequest(FTPReuqest));
 }
 
 void DownloadManagerWidget::provideAuthentication(QNetworkReply *replyFromServer, QAuthenticator *authenticator)
 {
-    authenticator->setUser("thieuquangtuan");
-    authenticator->setPassword("thematrix141");
+    if (ui->lineEditUsername->text().isEmpty() || ui->lineEditPassword->text().isEmpty())
+    {
+        //QMessageBox::information(this, "Server requires authentication", "Please provide server authentication to download this content");
+        qDebug() << "Server requires authentication ";
+        ui->buttonAuthenticationServer->setChecked(true);
+        ui->lineEditUsername->setFocus();
+        return;
+    }
+    authenticator->setUser(ui->lineEditUsername->text());
+    authenticator->setPassword(ui->lineEditPassword->text());
 }
 
 DownloadManagerWidget::~DownloadManagerWidget()
