@@ -7,18 +7,20 @@ DownloadManagerWidget::DownloadManagerWidget(QWidget *parent) :
     ui(new Ui::DownloadManagerWidget)
 {
     ui->setupUi(this);
+    layout()->setSizeConstraint(QLayout::SizeConstraint::SetFixedSize);
+    ui->groupBoxAuthenticationServer->setVisible(false);
     QObject::connect(ui->buttonDownload, &QPushButton::pressed, this, &DownloadManagerWidget::startDownload);
     QObject::connect(networkManager, &QNetworkAccessManager::finished, this, &DownloadManagerWidget::downloadFinished);
 }
 
 void DownloadManagerWidget::downloadByHTTP()
 {
-
+    qDebug() << "HTTP Request";
 }
 
 void DownloadManagerWidget::downloadByFTP()
 {
-
+    qDebug() << "FTP Request";
 }
 
 DownloadManagerWidget::~DownloadManagerWidget()
@@ -37,9 +39,13 @@ void DownloadManagerWidget::startDownload()
     else
     {
         if (downloadContent.scheme() == "http")
-            qDebug() << "HTTP Request";
+        {
+            downloadByHTTP();
+        }
         else if (downloadContent.scheme() == "ftp")
-            qDebug() << "FTP Request";
+        {
+            downloadByFTP();
+        }
         networkManager->get(QNetworkRequest(QUrl(ui->lineEditURL->text())));
         QMessageBox::information(this, "File", downloadContent.fileName(), QMessageBox::Ok);
     }

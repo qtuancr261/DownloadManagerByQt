@@ -7,8 +7,7 @@
 #include <QNetworkRequest>
 #include <QMessageBox>
 #include <QFile>
-#include <QDataStream>
-#include <QTextStream>
+#include <QInputDialog>
 namespace Ui {
 class DownloadManagerWidget;
 }
