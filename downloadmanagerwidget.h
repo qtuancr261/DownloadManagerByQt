@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QInputDialog>
+#include <QAuthenticator>
 namespace Ui {
 class DownloadManagerWidget;
 }
@@ -20,6 +21,7 @@ public:
     explicit DownloadManagerWidget(QWidget *parent = nullptr);
     void downloadByHTTP();
     void downloadByFTP();
+    void provideAuthentication(QNetworkReply* replyFromServer, QAuthenticator* authenticator);
     ~DownloadManagerWidget();
 
 private:
