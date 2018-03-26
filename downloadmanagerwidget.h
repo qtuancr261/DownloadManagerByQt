@@ -9,6 +9,8 @@
 #include <QFile>
 #include <QInputDialog>
 #include <QAuthenticator>
+#include <QHash>
+#include <QSignalMapper>
 namespace Ui {
 class DownloadManagerWidget;
 }
@@ -27,8 +29,13 @@ public:
 private:
     QNetworkAccessManager* networkManager;
     Ui::DownloadManagerWidget *ui;
+    QHash<int, QNetworkReply*> repliesHash;
+    QSignalMapper* networkMapper;
+    int contentID;
     void startDownload(); // from URL
+private slots:
     void downloadFinished(QNetworkReply* replyFromServer);
+    void downloadFinished(int replyID);
 };
 
 #endif // DOWNLOADMANAGERWIDGET_H
