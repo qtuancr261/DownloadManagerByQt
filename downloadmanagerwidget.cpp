@@ -31,12 +31,13 @@ void DownloadManagerWidget::downloadByHTTP()
 void DownloadManagerWidget::downloadByFTP()
 {
     qDebug() << "FTP Request";
-    QUrl FTPReuqest{ui->lineEditURL->text()};
-    //FTPReuqest.setUserName(QString("thieuquangtuan"));
-    //FTPReuqest.setPassword(QString("thematrix141"));
-    qDebug() << FTPReuqest.path().mid(1);
-    FTPReuqest.setPath(FTPReuqest.path().mid(1));
-    networkManager->get(QNetworkRequest(FTPReuqest));
+    QUrl FTPRequest{ui->lineEditURL->text()};
+    FTPRequest.setPath(FTPRequest.path().mid(1));
+    QNetworkReply* reply{networkManager->get(QNetworkRequest(FTPRequest))};
+    QObject::connect(reply, SIGNAL(finished()), networkMapper, SLOT(map()));
+    repliesHash.insert(++contentID, reply);
+    networkMapper->setMapping(reply, contentID);
+
 }
 
 void DownloadManagerWidget::provideAuthentication(QNetworkReply *replyFromServer, QAuthenticator *authenticator)
