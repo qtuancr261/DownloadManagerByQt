@@ -4,20 +4,28 @@
 DownloadManagerWidget::DownloadManagerWidget(QWidget *parent) :
     QWidget(parent),
     networkManager{new QNetworkAccessManager(parent)},
-    ui(new Ui::DownloadManagerWidget)
+    ui(new Ui::DownloadManagerWidget),
+    networkMapper{new QSignalMapper(this)},
+    contentID{}
 {
     ui->setupUi(this);
     layout()->setSizeConstraint(QLayout::SizeConstraint::SetFixedSize);
     ui->groupBoxAuthenticationServer->setVisible(false);
     QObject::connect(ui->buttonDownload, &QPushButton::pressed, this, &DownloadManagerWidget::startDownload);
-    QObject::connect(networkManager, &QNetworkAccessManager::finished, this, &DownloadManagerWidget::downloadFinished);
+    //QObject::connect(networkManager, &QNetworkAccessManager::finished, this, &DownloadManagerWidget::downloadFinished);
+    QObject::connect(networkMapper, SIGNAL(mapped(int)), this, SLOT(downloadFinished(int)));
     QObject::connect(networkManager, &QNetworkAccessManager::authenticationRequired, this, &DownloadManagerWidget::provideAuthentication);
 }
 
 void DownloadManagerWidget::downloadByHTTP()
 {
     qDebug() << "HTTP Request";
-    networkManager->get(QNetworkRequest(QUrl(ui->lineEditURL->text())));
+    QNetworkReply* reply{networkManager->get(QNetworkRequest(QUrl(ui->lineEditURL->text())))};
+    // Let map the reply
+    QObject::connect(reply, SIGNAL(finished()), networkMapper, SLOT(map()));
+    // store reply with a related ID in hash table
+    repliesHash.insert(++contentID, reply);
+    networkMapper->setMapping(reply, contentID);
 }
 
 void DownloadManagerWidget::downloadByFTP()
@@ -51,7 +59,7 @@ DownloadManagerWidget::~DownloadManagerWidget()
 }
 
 void DownloadManagerWidget::startDownload()
-{
+{   
     QUrl downloadContent{ui->lineEditURL->text()};
     if (downloadContent.isEmpty())
     {
@@ -83,10 +91,17 @@ void DownloadManagerWidget::downloadFinished(QNetworkReply *replyFromServer)
     {
         //ui->pTextEditPreview->setPlainText(replyFromServer->readAll());
         QFile downloadedFile{QUrl(ui->lineEditURL->text()).fileName()};
+        qDebug() << replyFromServer->request().url();
         downloadedFile.open(QIODevice::WriteOnly);
         //QDataStream fileWriter{&downloadedFile};
         //fileWriter << replyFromServer->readAll();
         downloadedFile.write(replyFromServer->readAll());
         replyFromServer->deleteLater();
     }
+}
+
+void DownloadManagerWidget::downloadFinished(int replyID)
+{
+    QNetworkReply* reply{repliesHash.take(replyID)};
+    downloadFinished(reply);
 }
