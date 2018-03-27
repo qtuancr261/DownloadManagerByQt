@@ -34,7 +34,6 @@ private:
     int contentID;
     void startDownload(); // from URL
 private slots:
-    void downloadFinished(QNetworkReply* replyFromServer);
     void downloadFinished(QString replyID);
 };
 

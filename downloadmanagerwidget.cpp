@@ -87,11 +87,6 @@ void DownloadManagerWidget::startDownload()
     }
 }
 
-void DownloadManagerWidget::downloadFinished(QNetworkReply *replyFromServer)
-{
-
-}
-
 void DownloadManagerWidget::downloadFinished(QString replyID)
 {
     QNetworkReply* replyFromServer{repliesHash.take(replyID)};
@@ -103,7 +98,7 @@ void DownloadManagerWidget::downloadFinished(QString replyID)
     else
     {
         //ui->pTextEditPreview->setPlainText(replyFromServer->readAll());
-        QFile downloadedFile{QUrl(ui->lineEditURL->text()).fileName()};
+        QFile downloadedFile{replyID.section('|', 1, 1)};
         //qDebug() << replyFromServer->request().url();
         downloadedFile.open(QIODevice::WriteOnly);
         //QDataStream fileWriter{&downloadedFile};
