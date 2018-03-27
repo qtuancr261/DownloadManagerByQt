@@ -13,19 +13,21 @@ DownloadManagerWidget::DownloadManagerWidget(QWidget *parent) :
     ui->groupBoxAuthenticationServer->setVisible(false);
     QObject::connect(ui->buttonDownload, &QPushButton::pressed, this, &DownloadManagerWidget::startDownload);
     //QObject::connect(networkManager, &QNetworkAccessManager::finished, this, &DownloadManagerWidget::downloadFinished);
-    QObject::connect(networkMapper, SIGNAL(mapped(int)), this, SLOT(downloadFinished(int)));
+    QObject::connect(networkMapper, SIGNAL(mapped(QString)), this, SLOT(downloadFinished(QString)));
     QObject::connect(networkManager, &QNetworkAccessManager::authenticationRequired, this, &DownloadManagerWidget::provideAuthentication);
 }
 
 void DownloadManagerWidget::downloadByHTTP()
 {
     qDebug() << "HTTP Request";
+    QUrl HTPPRequest{ui->lineEditURL->text()};
     QNetworkReply* reply{networkManager->get(QNetworkRequest(QUrl(ui->lineEditURL->text())))};
     // Let map the reply
     QObject::connect(reply, SIGNAL(finished()), networkMapper, SLOT(map()));
     // store reply with a related ID in hash table
-    repliesHash.insert(++contentID, reply);
-    networkMapper->setMapping(reply, contentID);
+    QString replyKey{QString::number(++contentID) + "|" + HTPPRequest.fileName()};
+    repliesHash.insert(replyKey, reply);
+    networkMapper->setMapping(reply, replyKey);
 }
 
 void DownloadManagerWidget::downloadByFTP()
@@ -35,8 +37,11 @@ void DownloadManagerWidget::downloadByFTP()
     FTPRequest.setPath(FTPRequest.path().mid(1));
     QNetworkReply* reply{networkManager->get(QNetworkRequest(FTPRequest))};
     QObject::connect(reply, SIGNAL(finished()), networkMapper, SLOT(map()));
-    repliesHash.insert(++contentID, reply);
-    networkMapper->setMapping(reply, contentID);
+
+    QString replyKey{QString::number(++contentID) + "|" + FTPRequest.fileName()};
+
+    repliesHash.insert(replyKey, reply);
+    networkMapper->setMapping(reply, replyKey);
 
 }
 
@@ -84,6 +89,13 @@ void DownloadManagerWidget::startDownload()
 
 void DownloadManagerWidget::downloadFinished(QNetworkReply *replyFromServer)
 {
+
+}
+
+void DownloadManagerWidget::downloadFinished(QString replyID)
+{
+    QNetworkReply* replyFromServer{repliesHash.take(replyID)};
+    qDebug() << replyID.section('|', 1, 1);
     if (replyFromServer->error())
     {
         QMessageBox::information(this, "Error when downloading", replyFromServer->errorString());
@@ -92,17 +104,11 @@ void DownloadManagerWidget::downloadFinished(QNetworkReply *replyFromServer)
     {
         //ui->pTextEditPreview->setPlainText(replyFromServer->readAll());
         QFile downloadedFile{QUrl(ui->lineEditURL->text()).fileName()};
-        qDebug() << replyFromServer->request().url();
+        //qDebug() << replyFromServer->request().url();
         downloadedFile.open(QIODevice::WriteOnly);
         //QDataStream fileWriter{&downloadedFile};
         //fileWriter << replyFromServer->readAll();
         downloadedFile.write(replyFromServer->readAll());
         replyFromServer->deleteLater();
     }
-}
-
-void DownloadManagerWidget::downloadFinished(int replyID)
-{
-    QNetworkReply* reply{repliesHash.take(replyID)};
-    downloadFinished(reply);
 }

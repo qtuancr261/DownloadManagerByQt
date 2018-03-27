@@ -29,13 +29,13 @@ public:
 private:
     QNetworkAccessManager* networkManager;
     Ui::DownloadManagerWidget *ui;
-    QHash<int, QNetworkReply*> repliesHash;
+    QHash<QString, QNetworkReply*> repliesHash;
     QSignalMapper* networkMapper;
     int contentID;
     void startDownload(); // from URL
 private slots:
     void downloadFinished(QNetworkReply* replyFromServer);
-    void downloadFinished(int replyID);
+    void downloadFinished(QString replyID);
 };
 
 #endif // DOWNLOADMANAGERWIDGET_H
