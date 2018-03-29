@@ -87,7 +87,7 @@ void DownloadManagerWidget::startDownload()
     }
 }
 
-void DownloadManagerWidget::downloadFinished(QString replyID)
+void DownloadManagerWidget::downloadFinished(const QString& replyID)
 {
     QNetworkReply* replyFromServer{repliesHash.take(replyID)};
     qDebug() << replyID.section('|', 1, 1);

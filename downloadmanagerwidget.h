@@ -24,7 +24,7 @@ public:
     void downloadByHTTP();
     void downloadByFTP();
     void provideAuthentication(QNetworkReply* replyFromServer, QAuthenticator* authenticator);
-    ~DownloadManagerWidget();
+    ~DownloadManagerWidget() override;
 
 private:
     QNetworkAccessManager* networkManager;
@@ -34,7 +34,7 @@ private:
     int contentID;
     void startDownload(); // from URL
 private slots:
-    void downloadFinished(QString replyID);
+    void downloadFinished(const QString& replyID);
 };
 
 #endif // DOWNLOADMANAGERWIDGET_H
