@@ -35,6 +35,7 @@ private:
     void startDownload(); // from URL
 private slots:
     void downloadFinished(const QString& replyID);
+    void showDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
 };
 
 #endif // DOWNLOADMANAGERWIDGET_H
