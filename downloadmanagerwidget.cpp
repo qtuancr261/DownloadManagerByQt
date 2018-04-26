@@ -24,6 +24,7 @@ void DownloadManagerWidget::downloadByHTTP()
     QNetworkReply* reply{networkManager->get(QNetworkRequest(QUrl(ui->lineEditURL->text())))};
     // Let map the reply
     QObject::connect(reply, SIGNAL(finished()), networkMapper, SLOT(map()));
+    QObject::connect(reply, &QNetworkReply::downloadProgress, this, &DownloadManagerWidget::showDownloadProgress);
     // store reply with a related ID in hash table
     QString replyKey{QString::number(++contentID) + "|" + HTPPRequest.fileName()};
     repliesHash.insert(replyKey, reply);
@@ -37,7 +38,7 @@ void DownloadManagerWidget::downloadByFTP()
     FTPRequest.setPath(FTPRequest.path().mid(1));
     QNetworkReply* reply{networkManager->get(QNetworkRequest(FTPRequest))};
     QObject::connect(reply, SIGNAL(finished()), networkMapper, SLOT(map()));
-
+    QObject::connect(reply, &QNetworkReply::downloadProgress, this, &DownloadManagerWidget::showDownloadProgress);
     QString replyKey{QString::number(++contentID) + "|" + FTPRequest.fileName()};
 
     repliesHash.insert(replyKey, reply);
@@ -99,7 +100,7 @@ void DownloadManagerWidget::downloadFinished(const QString& replyID)
     {
         //ui->pTextEditPreview->setPlainText(replyFromServer->readAll());
         QFile downloadedFile{replyID.section('|', 1, 1)};
-        qDebug() << replyFromServer->header(QNetworkRequest::ContentLengthHeader).toDouble() / (1024*1024);
+        qDebug() << replyFromServer->header(QNetworkRequest::ContentLengthHeader).toDouble() / (1024*1024)  << " mb";
         //qDebug() << replyFromServer->request().url();
         downloadedFile.open(QIODevice::WriteOnly);
         //QDataStream fileWriter{&downloadedFile};
@@ -107,4 +108,11 @@ void DownloadManagerWidget::downloadFinished(const QString& replyID)
         downloadedFile.write(replyFromServer->readAll());
         replyFromServer->deleteLater();
     }
+}
+
+void DownloadManagerWidget::showDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+{
+    qreal percent{bytesReceived < 1 ? 1.0 : static_cast<qreal>(bytesReceived) / bytesTotal};
+    ui->labelDownloadedSize->setText(QString::number(bytesReceived) + "/" + QString::number(bytesTotal));
+    ui->progressBarDowloadedSize->setValue(percent * ui->progressBarDowloadedSize->maximum());
 }
