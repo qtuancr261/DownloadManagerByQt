@@ -74,7 +74,7 @@ void DownloadManagerWidget::startDownload()
     }
     else
     {
-        if (downloadContent.scheme() == "http")
+        if (downloadContent.scheme() == "http" || downloadContent.scheme() == "https")
         {
             downloadByHTTP();
         }
@@ -99,6 +99,7 @@ void DownloadManagerWidget::downloadFinished(const QString& replyID)
     {
         //ui->pTextEditPreview->setPlainText(replyFromServer->readAll());
         QFile downloadedFile{replyID.section('|', 1, 1)};
+        qDebug() << replyFromServer->header(QNetworkRequest::ContentLengthHeader).toDouble() / (1024*1024);
         //qDebug() << replyFromServer->request().url();
         downloadedFile.open(QIODevice::WriteOnly);
         //QDataStream fileWriter{&downloadedFile};
