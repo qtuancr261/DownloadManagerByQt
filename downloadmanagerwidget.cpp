@@ -113,6 +113,6 @@ void DownloadManagerWidget::downloadFinished(const QString& replyID)
 void DownloadManagerWidget::showDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     qreal percent{bytesReceived < 1 ? 1.0 : static_cast<qreal>(bytesReceived) / bytesTotal};
-    ui->labelDownloadedSize->setText(QString::number(bytesReceived) + "/" + QString::number(bytesTotal));
+    ui->labelDownloadedSize->setText(MeasurementUnit::getConvenientUnitFromBytes(bytesReceived) + "/" + MeasurementUnit::getConvenientUnitFromBytes(bytesTotal));
     ui->progressBarDowloadedSize->setValue(percent * ui->progressBarDowloadedSize->maximum());
 }

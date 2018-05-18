@@ -11,6 +11,8 @@
 #include <QAuthenticator>
 #include <QHash>
 #include <QSignalMapper>
+#include <QtMath>
+#include "measurementunit.h"
 namespace Ui {
 class DownloadManagerWidget;
 }
