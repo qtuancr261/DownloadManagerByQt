@@ -26,10 +26,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        downloadmanagerwidget.cpp
+        downloadmanagerwidget.cpp \
+    measurementunit.cpp
 
 HEADERS += \
-        downloadmanagerwidget.h
+        downloadmanagerwidget.h \
+    measurementunit.h
 
 FORMS += \
         downloadmanagerwidget.ui
