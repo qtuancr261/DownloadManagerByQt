@@ -12,6 +12,7 @@
 #include <QHash>
 #include <QSignalMapper>
 #include <QtMath>
+#include <QFileDialog>
 #include "measurementunit.h"
 namespace Ui {
 class DownloadManagerWidget;
@@ -34,10 +35,12 @@ private:
     QHash<QString, QNetworkReply*> repliesHash;
     QSignalMapper* networkMapper;
     int contentID;
+    QDir savedLocation;
     void startDownload(); // from URL
+    void chooseSavedLocation();
 private slots:
     void downloadFinished(const QString& replyID);
-    void showDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+    void indicateDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
 };
 
 #endif // DOWNLOADMANAGERWIDGET_H

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>702</width>
-    <height>424</height>
+    <height>437</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -136,7 +136,7 @@
        <widget class="QLineEdit" name="lineEditSaveLocation"/>
       </item>
       <item row="0" column="2">
-       <widget class="QPushButton" name="buttonChooseSaveLocation">
+       <widget class="QPushButton" name="buttonChooseSavedLocation">
         <property name="text">
          <string/>
         </property>

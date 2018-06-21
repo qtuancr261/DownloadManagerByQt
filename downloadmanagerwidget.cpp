@@ -6,15 +6,18 @@ DownloadManagerWidget::DownloadManagerWidget(QWidget *parent) :
     networkManager{new QNetworkAccessManager(parent)},
     ui(new Ui::DownloadManagerWidget),
     networkMapper{new QSignalMapper(this)},
-    contentID{}
+    contentID{},
+    savedLocation{}
 {
     ui->setupUi(this);
     layout()->setSizeConstraint(QLayout::SizeConstraint::SetFixedSize);
+    ui->lineEditSaveLocation->setText(QDir::homePath());
     ui->groupBoxAuthenticationServer->setVisible(false);
     QObject::connect(ui->buttonDownload, &QPushButton::pressed, this, &DownloadManagerWidget::startDownload);
     //QObject::connect(networkManager, &QNetworkAccessManager::finished, this, &DownloadManagerWidget::downloadFinished);
     QObject::connect(networkMapper, SIGNAL(mapped(QString)), this, SLOT(downloadFinished(QString)));
     QObject::connect(networkManager, &QNetworkAccessManager::authenticationRequired, this, &DownloadManagerWidget::provideAuthentication);
+    QObject::connect(ui->buttonChooseSavedLocation, &QPushButton::pressed, this, &DownloadManagerWidget::chooseSavedLocation);
 }
 
 void DownloadManagerWidget::downloadByHTTP()
@@ -24,7 +27,7 @@ void DownloadManagerWidget::downloadByHTTP()
     QNetworkReply* reply{networkManager->get(QNetworkRequest(QUrl(ui->lineEditURL->text())))};
     // Let map the reply
     QObject::connect(reply, SIGNAL(finished()), networkMapper, SLOT(map()));
-    QObject::connect(reply, &QNetworkReply::downloadProgress, this, &DownloadManagerWidget::showDownloadProgress);
+    QObject::connect(reply, &QNetworkReply::downloadProgress, this, &DownloadManagerWidget::indicateDownloadProgress);
     // store reply with a related ID in hash table
     QString replyKey{QString::number(++contentID) + "|" + HTPPRequest.fileName()};
     repliesHash.insert(replyKey, reply);
@@ -38,7 +41,7 @@ void DownloadManagerWidget::downloadByFTP()
     FTPRequest.setPath(FTPRequest.path().mid(1));
     QNetworkReply* reply{networkManager->get(QNetworkRequest(FTPRequest))};
     QObject::connect(reply, SIGNAL(finished()), networkMapper, SLOT(map()));
-    QObject::connect(reply, &QNetworkReply::downloadProgress, this, &DownloadManagerWidget::showDownloadProgress);
+    QObject::connect(reply, &QNetworkReply::downloadProgress, this, &DownloadManagerWidget::indicateDownloadProgress);
     QString replyKey{QString::number(++contentID) + "|" + FTPRequest.fileName()};
 
     repliesHash.insert(replyKey, reply);
@@ -72,7 +75,11 @@ void DownloadManagerWidget::startDownload()
     {
         QMessageBox::information(this, "Invalid URL", "Please use a valid URL for downloading.", QMessageBox::Ok);
         ui->lineEditURL->setFocus();
+        return;
     }
+    savedLocation = ui->lineEditSaveLocation->text();
+    if (!savedLocation.exists())
+        QMessageBox::warning(this, "Couldn't find the location", QString("The location: %1 doesn't exists. Please check it again" ).arg(savedLocation.path()));
     else
     {
         if (downloadContent.scheme() == "http" || downloadContent.scheme() == "https")
@@ -86,6 +93,11 @@ void DownloadManagerWidget::startDownload()
 
         QMessageBox::information(this, "File", downloadContent.fileName(), QMessageBox::Ok);
     }
+}
+
+void DownloadManagerWidget::chooseSavedLocation()
+{
+    QFileDialog::getExistingDirectory(this, "Select the saved location", QDir::currentPath());
 }
 
 void DownloadManagerWidget::downloadFinished(const QString& replyID)
@@ -110,7 +122,7 @@ void DownloadManagerWidget::downloadFinished(const QString& replyID)
     }
 }
 
-void DownloadManagerWidget::showDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+void DownloadManagerWidget::indicateDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     qreal percent{bytesReceived < 1 ? 1.0 : static_cast<qreal>(bytesReceived) / bytesTotal};
     ui->labelDownloadedSize->setText(MeasurementUnit::getConvenientUnitFromBytes(bytesReceived) + "/" + MeasurementUnit::getConvenientUnitFromBytes(bytesTotal));
