@@ -82,6 +82,8 @@ void DownloadManagerWidget::startDownload()
         QMessageBox::warning(this, "Couldn't find the location", QString("The location: %1 doesn't exists. Please check it again" ).arg(savedLocation.path()));
     else
     {
+        // Disable the saved location line edit when start downloading
+        ui->lineEditSaveLocation->setDisabled(true);
         if (downloadContent.scheme() == "http" || downloadContent.scheme() == "https")
         {
             downloadByHTTP();
@@ -97,7 +99,9 @@ void DownloadManagerWidget::startDownload()
 
 void DownloadManagerWidget::chooseSavedLocation()
 {
-    QFileDialog::getExistingDirectory(this, "Select the saved location", QDir::currentPath());
+    savedLocation = QFileDialog::getExistingDirectory(this, "Select the saved location", QDir::currentPath());
+    if (!savedLocation.isEmpty())
+        ui->lineEditSaveLocation->setText(savedLocation.absolutePath());
 }
 
 void DownloadManagerWidget::downloadFinished(const QString& replyID)
@@ -111,7 +115,7 @@ void DownloadManagerWidget::downloadFinished(const QString& replyID)
     else
     {
         //ui->pTextEditPreview->setPlainText(replyFromServer->readAll());
-        QFile downloadedFile{replyID.section('|', 1, 1)};
+        QFile downloadedFile{savedLocation.absolutePath().append("/%1").arg(replyID.section('|', 1, 1))};
         qDebug() << replyFromServer->header(QNetworkRequest::ContentLengthHeader).toDouble() / (1024*1024)  << " mb";
         //qDebug() << replyFromServer->request().url();
         downloadedFile.open(QIODevice::WriteOnly);
@@ -120,6 +124,8 @@ void DownloadManagerWidget::downloadFinished(const QString& replyID)
         downloadedFile.write(replyFromServer->readAll());
         replyFromServer->deleteLater();
     }
+
+    ui->lineEditSaveLocation->setEnabled(true);
 }
 
 void DownloadManagerWidget::indicateDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
